@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using FluentAssertions;
@@ -102,6 +103,27 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234/?blah=baz", 
+                    null)
+                .Should()
+                .Be(requestBuilder);
+        }
+
+        [Fact]
+        public void GivenRouteWithParameterAndQueryStringAndSimilarRouteWithMoreSections_RequestBuilderIsReturned()
+        {
+            var requestBuilder = (RequestBuilder)new RequestBuilder().Get().ForUrl("/api/foos/{id}").WithQueryStringParameter("blah").HavingAnyValue();
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder,
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foos/1234?blah=baz",
                     null)
                 .Should()
                 .Be(requestBuilder);
@@ -213,6 +235,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .BeNull();
         }
+
+
 
         [Fact]
         public void GivenTwoResponsesWithDifferentAcceptHeaderAndAcceptHeaderInRequestMatchesSecond_ResponseBuilderIsReturned()
